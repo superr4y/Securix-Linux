@@ -58,19 +58,29 @@ f_check_arch() {
 ##############################################################################
 
 f_define_vars() {
+    # Set your http/s server here
+    WEB_ROOT=${WEB_ROOT:-"http://superr4y.net"}
+    #SECURIX_STAGE3BASEURL=${SECURIX_STAGE3BASEURL:-"https://mirror.securix.org/releases/${ARCH}/autobuilds/"}
+    #SECURIX_STAGE3LATESTTXT=${SECURIX_STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
+    #SECURIX_PORTAGEFILE=${SECURIX_PORTAGEFILE:-"https://mirror.securix.org/releases/snapshots/current/portage-latest.tar.bz2"}
 
-    SECURIX_STAGE3BASEURL=${SECURIX_STAGE3BASEURL:-"https://mirror.securix.org/releases/${ARCH}/autobuilds/"}
-    SECURIX_STAGE3LATESTTXT=${SECURIX_STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
-    SECURIX_PORTAGEFILE=${SECURIX_PORTAGEFILE:-"https://mirror.securix.org/releases/snapshots/current/portage-latest.tar.bz2"}
     # gentoo servers usually do not use https and if so, it is just self-signed certificate
+    # Use Gentoo anyway
     GENTOO_STAGE3BASEURL=${GENTOO_STAGE3BASEURL:-"http://distfiles.gentoo.org/releases/${ARCH}/autobuilds/"}
     STAGE3LATESTTXT=${STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
     GENTOO_PORTAGEFILE=${GENTOO_PORTAGEFILE:-"http://distfiles.gentoo.org/releases/snapshots/current/portage-latest.tar.bz2"}
-    SECURIX_FILES=${SECURIX_FILES:-"https://update.securix.org"}
-    SECURIX_FILESDR=${SECURIX_FILESDR:-"http://securix.sourceforge.net"}
-    SECURIX_SYSTEMCONF=${SECURIX_SYSTEMCONF:-"/install/conf.tar.gz"}
-    SECURIX_CHROOT=${SECURIX_CHROOT:-"/install/chroot.sh"}
-    KERNELCONFIG=${KERNELCONFIG:-"/install/kernel/hardened-${ARCH}.config"}
+
+    # TODO: Use git folder names and just set it as a http root 
+
+    #SECURIX_FILES=${SECURIX_FILES:-"https://update.securix.org"}
+    SECURIX_FILES="$WEB_ROOT"
+    #SECURIX_FILESDR=${SECURIX_FILESDR:-"http://securix.sourceforge.net"}
+    SECURIX_FILESDR="$WEB_ROOT"
+    #SECURIX_SYSTEMCONF=${SECURIX_SYSTEMCONF:-"/install/conf.tar.gz"}
+    SYSTEMCONF=${SYSTEMCONF:-"/system-config/conf.tar.gz"}
+    #SECURIX_CHROOT=${SECURIX_CHROOT:-"/install/chroot.sh"}
+    CHROOT=${CHROOT:-"/securix-install/chroot.sh"}
+    KERNELCONFIG=${KERNELCONFIG:-"/system-config/etc/kernels/hardened-amd64.config"}
     GMIRROR=${GMIRROR:-"http://ftp.fi.muni.cz/pub/linux/gentoo/"}
     GPG_EXTRA_OPTS=${GPG_EXTRA_OPTS:-"-quiet"}
     CPUS="$(grep -c '^processor' /proc/cpuinfo)"
@@ -800,19 +810,20 @@ f_setup_gentoo_gpg() {
 f_setup_stage3() {
     # changing context
     cd /mnt/gentoo
+    # TODO: deal with signatures later
 
     # download stage3
     f_msg info "###-### Step: Downloading hardened stage ---"
-    f_download "${SECURIX_STAGE3BASEURL}${STAGE3LATESTTXT}" "${GENTOO_STAGE3BASEURL}${STAGE3LATESTTXT}"
+    f_download "${GENTOO_STAGE3BASEURL}${STAGE3LATESTTXT}"
 
     # find path to latest stage3
     STAGE3LATESTFILE="$(grep -v '#' "${STAGE3LATESTTXT}")"
     # remove size information from path (example: 20150108/hardened/stage3-amd64-hardened-20150108.tar.bz2 188195929)
     STAGE3LATESTFILE=${STAGE3LATESTFILE%% *}
     # and download it
-    f_download "${SECURIX_STAGE3BASEURL}${STAGE3LATESTFILE}" "${GENTOO_STAGE3BASEURL}${STAGE3LATESTFILE}"
+    f_download "${GENTOO_STAGE3BASEURL}${STAGE3LATESTFILE}"
     statusd="${?}"
-    f_download "${SECURIX_STAGE3BASEURL}${STAGE3LATESTFILE}.DIGESTS.asc" "${GENTOO_STAGE3BASEURL}${STAGE3LATESTFILE}.DIGESTS.asc"
+    f_download "${GENTOO_STAGE3BASEURL}${STAGE3LATESTFILE}.DIGESTS.asc"
 
     # verify stage3 GPG
     # Example link:
@@ -830,7 +841,7 @@ f_setup_stage3() {
     gpg ${GPG_EXTRA_OPTS} --homedir /etc/portage/gpg --output "stage3latestfile_clear_text" --decrypt "${STAGE3LATESTFILE##*/}.DIGESTS.asc"
     if [ "${?}" -ne "0" ]; then
         f_msg error "Gentoo GPG signature of Stage3 file do not match !!"
-        exit_on_error
+        #exit_on_error
     fi
 
     # check SHA512
@@ -840,7 +851,7 @@ f_setup_stage3() {
     if [ "${statusd}" -ne "0" -o "${statusc}" -ne "0" ]; then
         f_msg error "ERROR: There was problem with download or checksum of stage3 file. Exit codes: "
         f_msg warn "download: ${statusd} checksum: ${statusc}"
-        exit_on_error
+        #exit_on_error
     else
         echo "-- SHA512 checksum: OK"
     fi
@@ -867,7 +878,7 @@ f_setup_portage() {
     gpg --homedir /etc/portage/gpg --verify "${SECURIX_PORTAGEFILE##*/}.gpgsig" "${SECURIX_PORTAGEFILE##*/}"
     if [ "${?}" -ne "0" ]; then
         f_msg error "Gentoo GPG signature of Portage file do not match !!"
-        exit_on_error
+        #exit_on_error
     fi
 
     # check MD5
@@ -921,7 +932,7 @@ f_verify_signature() {
     else
         f_msg error "--- Problem when computing checksum of Securix files!!"
         grep -E "chroot.sh|conf.tar.gz" sha512.list && shasum -a 512 chroot.sh conf.tar.gz
-        exit_on_error
+        #exit_on_error
     fi
 
     f_msg info "###-### Step: Verifying Securix files signature ---"
@@ -952,7 +963,7 @@ CFLAGS="-march=native -O2 -fforce-addr -pipe"
 CXXFLAGS="\${CFLAGS}"
 CHOST="${CHOSTS}"
 MAKEOPTS="-j${MOPTS}"
-USE="-X -kde -gnome -qt4 -gtk -suid -jit hardened pic pax_kernel chroot secure-delete ncurses symlink bash-completion ldap gnutls ssl crypt tcpd pam xml perl python snmp unicode jpeg png vim-syntax mmx readline"
+USE="-X -kde -gnome -qt4 -gtk -suid -jit -thin hardened pic pax_kernel chroot secure-delete ncurses symlink bash-completion ldap gnutls ssl crypt cryptsetup tcpd pam xml perl python snmp unicode jpeg png vim-syntax mmx readline"
 FEATURES="sandbox sfperms strict buildpkg userfetch parallel-fetch"
 LINGUAS="en"
 CONFIG_PROTECT="/etc"
