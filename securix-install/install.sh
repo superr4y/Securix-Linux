@@ -1215,6 +1215,18 @@ f_banner_completed() {
     f_msg info "You can REBOOT to your new system. Visit www.securix.org for next steps."
 }
 
+f_debug(){
+    local answer
+    f_msg info "Press [d] for debug shell: "
+    read answer
+
+    if [ "${answer}" = "d"]; then
+	f_msg info "Execute Debug Shell"
+	/bin/bash
+        f_msg info "Leave Debug Shell"
+    fi
+}
+
 f_install_securix() {
 
     # execute all steps
@@ -1235,23 +1247,32 @@ f_install_securix() {
     f_ask_disk_encryption
     f_format_boot_swap
     f_size_logical_volumes
+    # TODO: Add option to create partitions manual
     f_create_partitions
     f_setup_disk_encryption
     f_setup_volumes
     f_setup_lvm
     f_setup_gentoo_gpg
     f_setup_stage3
+f_debug
     f_setup_portage
+f_debug
     f_download_securix_conf
+f_debug
     f_download_chroot
+f_debug
     f_download_hardened
+f_debug
     f_verify_signature
+f_debug
     f_setup_makeconf
+f_debug
     f_setup_proxies
     f_setup_dns
     f_setup_hostname
     f_setup_release
     f_setup_fstab
+f_debug
     f_setup_network
     f_setup_fail2ban_ip
     f_mount_proc_dev

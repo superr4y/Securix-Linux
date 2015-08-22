@@ -610,6 +610,18 @@ f_all_done() {
     rm -f chroot.config
 }
 
+f_debug(){
+    local answer
+    f_msg info "Press [d] for debug shell: "
+    read answer
+
+    if [ "${answer}" = "d"]; then
+	f_msg info "Execute Debug Shell"
+	/bin/bash
+        f_msg info "Leave Debug Shell"
+    fi
+}
+
 f_install_chroot() {
 
     # execute chroot functions
@@ -621,20 +633,32 @@ f_install_chroot() {
     f_setup_network_rc
     f_setup_root_pass
     f_setup_hardened_profile
+f_debug
     f_securix_package_use
+f_debug
     f_emerge_hardened
+f_debug
     f_compile_kernel
+f_debug
     f_emerge_system
+f_debug
     f_rebuild_toolchain
+f_debug
     f_emerge_apps
+f_debug
     f_setup_serial
     f_setup_smart
     f_setup_grub
+f_debug
     f_unpack_securix_config
+f_debug
     f_setup_securix_system
+f_debug
     f_three_finger_salute_disable
     f_setup_genkernel
+f_debug
     f_setup_portage
+f_debug
     f_setup_gentoo_gpg
     f_setup_ntp
     f_setup_mail
