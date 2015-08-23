@@ -226,14 +226,16 @@ f_securix_package_use() {
     # accept keywords
     if [ ! -d "/etc/portage/" ]; then
         mkdir /etc/portage/
+	mkdir /etc/portage/package.use
     fi
+
     cat > /etc/portage/package.accept_keywords << !EOF
 app-admin/paxtest
 app-forensics/unhide
 !EOF
 
 # package use
-    cat > /etc/portage/package.use << !EOF
+    cat > /etc/portage/package.use/securix << !EOF
 sys-fs/cryptsetup gcrypt
 sys-fs/lvm2 -thin
 sys-process/lsof rpc
@@ -615,7 +617,7 @@ f_debug(){
     f_msg info "Press [d] for debug shell: "
     read answer
 
-    if [ "${answer}" = "d"]; then
+    if [ "${answer}" = "d" ]; then
 	f_msg info "Execute Debug Shell"
 	/bin/bash
         f_msg info "Leave Debug Shell"
@@ -676,7 +678,6 @@ f_debug
 ##############################################################################
 
 f_msg info "###-### Step: Running CHROOT script ---"
-
 # if chroot config file exist ${CHROOTCONFIG}, load it
 if [ -r "/chroot.config" ]; then
     source /chroot.config

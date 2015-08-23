@@ -59,10 +59,10 @@ f_check_arch() {
 
 f_define_vars() {
     # Set your http/s server here
-    WEB_ROOT=${WEB_ROOT:-"http://superr4y.net"}
-    #SECURIX_STAGE3BASEURL=${SECURIX_STAGE3BASEURL:-"https://mirror.securix.org/releases/${ARCH}/autobuilds/"}
-    #SECURIX_STAGE3LATESTTXT=${SECURIX_STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
-    #SECURIX_PORTAGEFILE=${SECURIX_PORTAGEFILE:-"https://mirror.securix.org/releases/snapshots/current/portage-latest.tar.bz2"}
+    WEB_ROOT=${WEB_ROOT:-"http://gentoo.superr4y.net"}
+    SECURIX_STAGE3BASEURL=${GENTOO_STAGE3BASEURL:-"http://distfiles.gentoo.org/releases/${ARCH}/autobuilds/"}
+    SECURIX_STAGE3LATESTTXT=${STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
+    SECURIX_PORTAGEFILE=${GENTOO_PORTAGEFILE:-"http://distfiles.gentoo.org/releases/snapshots/current/portage-latest.tar.bz2"}
 
     # gentoo servers usually do not use https and if so, it is just self-signed certificate
     # Use Gentoo anyway
@@ -76,10 +76,9 @@ f_define_vars() {
     SECURIX_FILES="$WEB_ROOT"
     #SECURIX_FILESDR=${SECURIX_FILESDR:-"http://securix.sourceforge.net"}
     SECURIX_FILESDR="$WEB_ROOT"
-    #SECURIX_SYSTEMCONF=${SECURIX_SYSTEMCONF:-"/install/conf.tar.gz"}
-    SYSTEMCONF=${SYSTEMCONF:-"/system-config/conf.tar.gz"}
+    SECURIX_SYSTEMCONF=${SYSTEMCONF:-"/system-config/conf.tar.gz"}
     #SECURIX_CHROOT=${SECURIX_CHROOT:-"/install/chroot.sh"}
-    CHROOT=${CHROOT:-"/securix-install/chroot.sh"}
+    SECURIX_CHROOT=${SECURIX_CHROOT:-"/securix-install/chroot.sh"}
     KERNELCONFIG=${KERNELCONFIG:-"/system-config/etc/kernels/hardened-amd64.config"}
     GMIRROR=${GMIRROR:-"http://ftp.fi.muni.cz/pub/linux/gentoo/"}
     GPG_EXTRA_OPTS=${GPG_EXTRA_OPTS:-"-quiet"}
@@ -887,7 +886,7 @@ f_setup_portage() {
     if [ "${statusd}" -ne "0" -o "${statusc}" -ne "0" ]; then
         f_msg error "ERROR: There was problem with download or checksum of Portage. Exit codes: "
         f_msg warn "download: ${statusd} checksum: ${statusc}"
-        exit_on_error
+        #exit_on_error
     else
         echo "-- MD5 checksum: OK"
     fi
@@ -943,7 +942,7 @@ f_verify_signature() {
 f_setup_makeconf() {
     f_msg info "###-### Step: Configuring base system ---"
     # delete default file, as we need directory
-    rm -f /mnt/gentoo/etc/portage/make.conf
+    rm -rf /mnt/gentoo/etc/portage/make.conf
     # /etc/portage/make.conf/00_securix_make.conf
     mkdir -p /mnt/gentoo/etc/portage/make.conf/
     cat > /mnt/gentoo/etc/portage/make.conf/00_securix_make.conf << !EOF
@@ -963,7 +962,7 @@ CFLAGS="-march=native -O2 -fforce-addr -pipe"
 CXXFLAGS="\${CFLAGS}"
 CHOST="${CHOSTS}"
 MAKEOPTS="-j${MOPTS}"
-USE="-X -kde -gnome -qt4 -gtk -suid -jit -thin hardened pic pax_kernel chroot secure-delete ncurses symlink bash-completion ldap gnutls ssl crypt cryptsetup tcpd pam xml perl python snmp unicode jpeg png vim-syntax mmx readline"
+USE="-X -kde -gnome -qt4 -gtk -suid -jit hardened pic pax_kernel chroot secure-delete ncurses symlink bash-completion ldap gnutls ssl crypt cryptsetup tcpd pam xml perl python snmp unicode jpeg png vim-syntax mmx readline"
 FEATURES="sandbox sfperms strict buildpkg userfetch parallel-fetch"
 LINGUAS="en"
 CONFIG_PROTECT="/etc"
@@ -1220,7 +1219,7 @@ f_debug(){
     f_msg info "Press [d] for debug shell: "
     read answer
 
-    if [ "${answer}" = "d"]; then
+    if [ "${answer}" = "d" ]; then
 	f_msg info "Execute Debug Shell"
 	/bin/bash
         f_msg info "Leave Debug Shell"
@@ -1228,7 +1227,6 @@ f_debug(){
 }
 
 f_install_securix() {
-
     # execute all steps
     f_check_arch
     f_define_vars
@@ -1254,25 +1252,17 @@ f_install_securix() {
     f_setup_lvm
     f_setup_gentoo_gpg
     f_setup_stage3
-f_debug
     f_setup_portage
-f_debug
     f_download_securix_conf
-f_debug
     f_download_chroot
-f_debug
     f_download_hardened
-f_debug
     f_verify_signature
-f_debug
     f_setup_makeconf
-f_debug
     f_setup_proxies
     f_setup_dns
     f_setup_hostname
     f_setup_release
     f_setup_fstab
-f_debug
     f_setup_network
     f_setup_fail2ban_ip
     f_mount_proc_dev
