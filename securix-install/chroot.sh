@@ -240,6 +240,7 @@ sys-fs/cryptsetup gcrypt
 sys-fs/lvm2 -thin
 sys-process/lsof rpc
 sys-kernel/genkernel-next ${GENKERNELUSE}
+>=sys-libs/ncurses-5.9-r3 abi_x86_32
 !EOF
 }
 
@@ -428,6 +429,7 @@ f_unpack_securix_config() {
     mkdir /etc/securix
     mkdir /tmp/securix-conf
     mkdir /var/securix
+    # TODO: pack securix scripts in conf.tar.gz
     tar xzf /conf.tar.gz -C /tmp/securix-conf/
     cp -rf /tmp/securix-conf/* /
     rm -f /conf.tar.gz
@@ -644,6 +646,7 @@ f_debug
 f_debug
     f_emerge_system
 f_debug
+    # TODO: why not building toolchain at first (no recompiling necessary)
     f_rebuild_toolchain
 f_debug
     f_emerge_apps
