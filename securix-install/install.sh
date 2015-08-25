@@ -70,8 +70,6 @@ f_define_vars() {
     STAGE3LATESTTXT=${STAGE3LATESTTXT:-"latest-stage3-${SUBARCH}-hardened.txt"}
     GENTOO_PORTAGEFILE=${GENTOO_PORTAGEFILE:-"http://distfiles.gentoo.org/releases/snapshots/current/portage-latest.tar.bz2"}
 
-    # TODO: Use git folder names and just set it as a http root 
-
     #SECURIX_FILES=${SECURIX_FILES:-"https://update.securix.org"}
     SECURIX_FILES="$WEB_ROOT"
     #SECURIX_FILESDR=${SECURIX_FILESDR:-"http://securix.sourceforge.net"}
@@ -963,13 +961,14 @@ CXXFLAGS="\${CFLAGS}"
 CHOST="${CHOSTS}"
 MAKEOPTS="-j${MOPTS}"
 USE="-X -kde -gnome -qt4 -gtk -suid -jit hardened pic pax_kernel chroot secure-delete ncurses symlink bash-completion ldap gnutls ssl crypt cryptsetup tcpd pam xml perl python snmp unicode jpeg png vim-syntax mmx readline"
-FEATURES="sandbox sfperms strict buildpkg userfetch parallel-fetch"
+FEATURES="sandbox sfperms strict buildpkg getbinpkg userfetch parallel-fetch"
 LINGUAS="en"
 CONFIG_PROTECT="/etc"
 GENTOO_MIRRORS="${GMIRROR}"
 PORTAGE_NICENESS=10
+PORTAGE_BINHOST="http://gentoo.superr4y.net/packages"
 # this option will unmask packages automatically, use with caution
-#EMERGE_DEFAULT_OPTS="--autounmask-write"
+EMERGE_DEFAULT_OPTS="--autounmask-write"
 #PORTAGE_RSYNC_EXTRA_OPTS="--quiet"
 
 !EOF

@@ -325,7 +325,8 @@ f_emerge_apps() {
 htop tcpdump lsof rkhunter tcptraceroute strace app-misc/mc dmidecode zip ftp \
 ethtool net-tools iproute2 mirrorselect net-misc/telnet-bsd app-misc/screen \
 whois bind-tools app-crypt/gnupg iftop netcat colordiff unhide scrub pwgen \
-pyinotify traceroute wget app-editors/vim sys-fs/udev-init-scripts
+pyinotify traceroute wget app-editors/vim sys-fs/udev-init-scripts dev-vcs/git \
+mlocate tmux
 
     revdep-rebuild --quiet
 }
@@ -429,7 +430,6 @@ f_unpack_securix_config() {
     mkdir /etc/securix
     mkdir /tmp/securix-conf
     mkdir /var/securix
-    # TODO: pack securix scripts in conf.tar.gz
     tar xzf /conf.tar.gz -C /tmp/securix-conf/
     cp -rf /tmp/securix-conf/* /
     rm -f /conf.tar.gz
@@ -637,33 +637,22 @@ f_install_chroot() {
     f_setup_network_rc
     f_setup_root_pass
     f_setup_hardened_profile
-f_debug
     f_securix_package_use
 f_debug
-    f_emerge_hardened
-f_debug
-    f_compile_kernel
-f_debug
-    f_emerge_system
-f_debug
-    # TODO: why not building toolchain at first (no recompiling necessary)
     f_rebuild_toolchain
-f_debug
+    f_emerge_hardened
+    f_compile_kernel
+    f_emerge_system
+    #f_rebuild_toolchain
     f_emerge_apps
-f_debug
     f_setup_serial
     f_setup_smart
     f_setup_grub
-f_debug
     f_unpack_securix_config
-f_debug
     f_setup_securix_system
-f_debug
     f_three_finger_salute_disable
     f_setup_genkernel
-f_debug
     f_setup_portage
-f_debug
     f_setup_gentoo_gpg
     f_setup_ntp
     f_setup_mail
