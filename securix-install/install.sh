@@ -966,7 +966,7 @@ LINGUAS="en"
 CONFIG_PROTECT="/etc"
 GENTOO_MIRRORS="${GMIRROR}"
 PORTAGE_NICENESS=10
-PORTAGE_BINHOST="http://gentoo.superr4y.net/packages"
+PORTAGE_BINHOST="${WEB_ROOT}/packages"
 # this option will unmask packages automatically, use with caution
 EMERGE_DEFAULT_OPTS="--autounmask-write"
 #PORTAGE_RSYNC_EXTRA_OPTS="--quiet"
